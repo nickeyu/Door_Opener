@@ -27,7 +27,7 @@ void ADC_init() {
 
 int j;
 int clkwise = 2;
-unsigned short light_max = 100;   //based on lab room
+unsigned short light_max = 90;   //based on lab room 100
 char image_ready;
 int change = 0;
 int turnTime = 0;
@@ -59,7 +59,7 @@ int TickFct_USART(int state) {
 				motion_holder = 1;
 				//LCD_DisplayString(1, "SENDING");
 				if ( USART_IsSendReady(0)) {
-					USART_Send('1' + night, 0);
+					USART_Send('1'+ night, 0);
 					if ( USART_HasTransmitted(0)) {
 						LCD_DisplayString(1, "SENDED DATA!");
 					}
@@ -83,7 +83,6 @@ int TickFct_USART(int state) {
 				if ( image_ready == 2 ) {
 					
 					cat_lcd = 0;
-					
 					//wait_lcd = 1;
 					task_completed = 1;
 					motion_holder = 0;
@@ -93,6 +92,8 @@ int TickFct_USART(int state) {
 			else {
 				if ( timeout == 3000) {
 					LCD_DisplayString(1, "Timeout!");
+				//	task_completed = 1;
+				//	motion_holder = 0;
 					state = usart_wait;
 				}
 				else
@@ -176,7 +177,7 @@ int TickFct_phase(int state) {
 				LCD_WriteData('0' + 36);
 				//LCD_DisplayString(17, "NIGHT");
 				change = 0;
-				night = 0;
+				night = 1;
 				state = checkBut;
 			}
 			else if ( (ADC > light_max/2 && change == 0)) {
@@ -194,7 +195,7 @@ int TickFct_phase(int state) {
 				LCD_WriteData(32);
 				LCD_Cursor(20);
 				change = 1;
-				night = 1;
+				night = 0;
 				state = checkBut;
 			}
 			/*else if ( ADC == light_max/2 ) {
@@ -382,4 +383,3 @@ int main(void)
 		}*/
 	}
 }
-
