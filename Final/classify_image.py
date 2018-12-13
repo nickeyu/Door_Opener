@@ -51,8 +51,9 @@ import tensorflow as tf
 import serial
 import os
 from time import sleep
-from fractions import Fraction
+#from fractions import Fraction
 import picamera
+from fractions import Fraction
 
 ser = serial.Serial("/dev/ttyAMA0", 9600)
 sleep(3)
@@ -60,20 +61,25 @@ camera = picamera.PiCamera()
 camera.resolution = (1024, 768)
 #global send_data
 
-def take_picture(night):
+def take_picture():
     camera.start_preview()
     sleep(5)
-    if ( night ):
-	camera.framerate = Fraction(1,6)
-	camera.sensor_mode = 3
-        camera.shutter_speed = 6000000
-	camera.iso = 800
-	sleep(30)
-	camera.exposure_mode = 'off'
     camera.capture("Test.jpg")
 
-    os.system("xdg-open Test.jpg")
+ #   os.system("xdg-open Test.jpg")
     camera.stop_preview()
+
+def take_picture_night():
+    camera.start_preview()
+    sleep(5)
+    camera.framerate = Fraction(1,6)
+    camera.sensor_mode = 3
+    camera_shutter_speed = 6000000
+    camera.iso = 800
+    sleep(20)
+    camera.exposure_mode = 'off'
+
+    camera.capture("Test.jpg")
 
 FLAGS = None
 
@@ -243,18 +249,19 @@ def main(_):
 
   #wait for serial read from ATMEGA1284
   while 1:
-   received_data = ser.read(2)
+   received_data = ser.read(1)
 
    print ('READ: ' + received_data)
-   if received_data[0] == '1':
-     night = received_data[1]
+   if received_data == '1':
      #start camera and take a picture
-     take_picture(night)
+     take_picture()
+   elif received_data == '2':
+     take_picture_night()
 
    image = (FLAGS.image_file if FLAGS.image_file else
            os.path.join(FLAGS.model_dir, 'katniss.jpg'))
    send_data = run_inference_on_image(image)
-   if ( send_data == '1' ):
+   if ( send_data == '1' ):      #check if picture recognized is cat send a 1
         print('SENDING FOUND CAT')
 	ack = '1'
 	newACK = ack.encode('ascii')
